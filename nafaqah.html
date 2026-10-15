@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقرير النفقات والمدارس والقضايا</title>
+    <!-- استدعاء خط ألمنيوم/أميري ناعم وأيقونات FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --primary-hover: #1e40af;
+            --whatsapp-color: #25d366;
+            --whatsapp-hover: #1da851;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #334155;
+            --border-color: #e2e8f0;
+            --danger-bg: #fef2f2;
+            --danger-text: #dc2626;
+            --success-bg: #f0fdf4;
+            --success-text: #16a34a;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 30px 15px;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* شريط الأدوات والأزرار */
+        .actions-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        }
+
+        .btn-print {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .btn-print:hover { background-color: var(--primary-hover); }
+
+        .btn-whatsapp {
+            background-color: var(--whatsapp-color);
+            color: white;
+        }
+        .btn-whatsapp:hover { background-color: var(--whatsapp-hover); }
+
+        /* البطاقات والتنسيق العام */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--primary-color);
+        }
+
+        .card-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        /* الجداول */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: right;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 15px;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 700;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-unpaid {
+            background-color: var(--danger-bg);
+            color: var(--danger-text);
+        }
+
+        .status-paid {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+        }
+
+        /* قائمة القضايا الغير محلولة */
+        .unresolved-list {
+            list-style: none;
+        }
+
+        .unresolved-list li {
+            position: relative;
+            padding: 10px 35px 10px 10px;
+            margin-bottom: 8px;
+            background-color: #f8fafc;
+            border-radius: 6px;
+            border-right: 4px solid #f59e0b;
+            font-weight: 600;
+        }
+
+        .unresolved-list li::before {
+            content: "\f06a";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            right: 12px;
+            color: #f59e0b;
+        }
+
+        /* تنسيق الطباعة */
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+            .actions-bar {
+                display: none;
+            }
+            .card {
+                box-shadow: none;
+                border: 1px solid #ccc;
+                margin-bottom: 15px;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- أزرار التحكم -->
+    <div class="actions-bar">
+        <button class="btn btn-print" onclick="window.print()">
+            <i class="fa-solid fa-print"></i> طباعة التقرير
+        </button>
+        <button class="btn btn-whatsapp" onclick="sendToWhatsApp()">
+            <i class="fa-brands fa-whatsapp"></i> إرسال عبر واتساب
+        </button>
+    </div>
+
+    <!-- الجدول الأول: النفقة -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fa-solid fa-scale-balanced fa-lg"></i>
+            <h2>النفقة طبقا لقضايا المحكمة</h2>
+        </div>
+        <div class="table-responsive">
+            <table id="table-expenses">
+                <thead>
+                    <tr>
+                        <th>الفترة</th>
+                        <th>من</th>
+                        <th>إلى</th>
+                        <th>المبلغ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>الفترة الأولى</td>
+                        <td>01-10-2026</td>
+                        <td>01-04-2027</td>
+                        <td><strong>30,000 ج.م</strong></td>
+                    </tr>
+                    <tr>
+                        <td>الفترة الثانية</td>
+                        <td>01-04-2027</td>
+                        <td>01-10-2027</td>
+                        <td><strong>30,000 ج.م</strong></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr style="background-color: #f8fafc; font-weight: bold;">
+                        <td colspan="3" style="text-align: left;">الإجمالي:</td>
+                        <td style="color: var(--primary-color);">60,000 ج.م</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- الجدول الثاني: المدارس -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fa-solid fa-graduation-cap fa-lg"></i>
+            <h2>المدارس</h2>
+        </div>
+        <div class="table-responsive">
+            <table id="table-schools">
+                <thead>
+                    <tr>
+                        <th>السنة الدراسية</th>
+                        <th>حالة الدفع</th>
+                        <th>ملاحظات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2026 / 2027</td>
+                        <td><span class="status-badge status-unpaid">لم يتم الدفع</span></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>2025 / 2026</td>
+                        <td><span class="status-badge status-unpaid">لم يتم الدفع</span></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>2024 / 2025</td>
+                        <td><span class="status-badge status-paid">تم الدفع</span></td>
+                        <td><strong style="color: #d97706;">مطلوب إيصال</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- القسم الثالث: القضايا الغير محلولة -->
+    <div class="card">
+        <div class="card-header" style="color: #d97706;">
+            <i class="fa-solid fa-triangle-exclamation fa-lg"></i>
+            <h2>قضايا لم تحل حتى الآن</h2>
+        </div>
+        <ul class="unresolved-list" id="unresolved-list">
+            <li>استلام قائمة المنقولات</li>
+            <li>التوقيع باستلام النفقات الشهرية عند استلامها</li>
+            <li>التوقيع باستلام المدارس عند استلامها</li>
+        </ul>
+    </div>
+
+</div>
+
+<script>
+    function sendToWhatsApp() {
+        // تجهيز نص رسالة الواتساب بصورة مرتبة
+        let message = `*📋 تقرير النفقة والمدارس والقضايا*\n`;
+        message += `-----------------------------------\n\n`;
+
+        // 1. النفقة
+        message += `*⚖️ النفقة طبقا لقضايا المحكمة:*\n`;
+        message += `• الفترة 1 (01-10-2026 إلى 01-04-2027): 30,000 ج.م\n`;
+        message += `• الفترة 2 (01-04-2027 إلى 01-10-2027): 30,000 ج.م\n`;
+        message += `*الإجمالي:* 60,000 ج.م\n\n`;
+
+        // 2. المدارس
+        message += `*🎓 المدارس:*\n`;
+        message += `• سنة 2026/2027: ❌ لم يتم الدفع\n`;
+        message += `• سنة 2025/2026: ❌ لم يتم الدفع\n`;
+        message += `• سنة 2024/2025: ✅ تم الدفع (مطلوب إيصال)\n\n`;
+
+        // 3. القضايا المعلقة
+        message += `*⚠️ قضايا لم تحل حتى الآن:*\n`;
+        message += `1️⃣ استلام قائمة المنقولات\n`;
+        message += `2️⃣ التوقيع باستلام النفقات الشهرية عند استلامها\n`;
+        message += `3️⃣ التوقيع باستلام المدارس عند استلامها\n`;
+
+        // ترميز الرسالة للروابط
+        let encodedMessage = encodeURIComponent(message);
+        
+        // فتح الواتساب
+        let whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
+        window.open(whatsappUrl, '_blank');
+    }
+</script>
+
+</body>
+</html>
